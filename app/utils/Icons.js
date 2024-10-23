@@ -1,4 +1,4 @@
-export const bars = <i className="fa-solid fa-bars fa-beat"></i>;
+export const bars = <i className="fa-solid fa-bars "></i>;
 export const arrowLeft = <i className="fa-solid fa-arrow-left fa-beat"></i>;
 
 export const add = <i className="fa-solid fa-plus"></i>;

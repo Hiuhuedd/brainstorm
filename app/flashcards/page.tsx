@@ -1,8 +1,8 @@
 
 "use client"
 import React, { useState, useEffect } from 'react';
-import Tasks from './Components/Tasks/Tasks';
-import axios from 'axios';
+import Tasks from '../Components/Tasks/Tasks';
+import { PRODUCTION_URL } from "../utils/urls"; // Import URLs
 
 export default function Home() {
 
@@ -28,7 +28,7 @@ export default function Home() {
   useEffect(() => {
     const fetchResources = async () => {
       try {
-        const response = await fetch("http://localhost:5000/resources", {
+        const response = await fetch(`${PRODUCTION_URL}/resources`, {
           method: "GET", // Specify the method as GET
           headers: {
             "Content-Type": "application/json", // Set the content type
@@ -65,7 +65,7 @@ export default function Home() {
   return (
     <div>
       {/* Render the Tasks component only when data is fetched */}
-      <Tasks title="Resources" resources={resources} />
+      <Tasks title="Flashcards" resources={resources} />
     </div>
   );
 }

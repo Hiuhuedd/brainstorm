@@ -1,9 +1,8 @@
 "use client";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
 import { useGlobalState } from "@/app/context/globalProvider";
 import Image from "next/image";
-
 import menu from "@/app/utils/menu";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -14,6 +13,7 @@ import { UserButton, useClerk, useUser } from "@clerk/nextjs";
 function Sidebar() {
   const { theme, collapsed, collapseMenu } = useGlobalState();
   const { signOut } = useClerk();
+  const sidebarRef = useRef(null);
 
   const { user } = useUser();
 
@@ -26,14 +26,34 @@ function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
 
+  useEffect(() => {
+    function handleClickOutside(event: { target: Node | null; }) {
+      // Only process if sidebar is open (not collapsed)
+      if (sidebarRef.current && 
+          !sidebarRef.current.contains(event.target) && 
+          !collapsed) {
+        // Check if the clicked element is not the toggle button
+        const toggleButton = document.querySelector('.toggle-nav');
+        if (!toggleButton?.contains(event.target)) {
+          collapseMenu();
+        }
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [collapsed, collapseMenu]);
+
   const handleClick = (link: string) => {
     router.push(link);
   };
 
   return (
-    <SidebarStyled theme={theme} collapsed={collapsed}>
+    <SidebarStyled theme={theme} collapsed={collapsed} ref={sidebarRef}>
       <button className="toggle-nav" onClick={collapseMenu}>
-        {collapsed ? bars : arrowLeft}
+        {collapsed ? bars : ''}
       </button>
       <div className="profile">
         <div className="profile-overlay"></div>
@@ -43,7 +63,7 @@ function Sidebar() {
         <div className="user-btn absolute z-20 top-0 w-full h-full">
           <UserButton />
         </div>
-        <h1 className="capitalize">
+        <h1 className="capitalize text-sm">
           {firstName} {lastName}
         </h1>
       </div>
@@ -56,6 +76,7 @@ function Sidebar() {
               className={`nav-item ${pathname === link ? "active" : ""}`}
               onClick={() => {
                 handleClick(link);
+                collapseMenu()
               }}
             >
               {item.icon}
@@ -73,6 +94,7 @@ function Sidebar() {
           fw={"500"}
           fs={"1.2rem"}
           icon={logout}
+          color={theme.colorDanger}
           click={() => {
             signOut(() => router.push("/signin"));
           }}
@@ -85,9 +107,11 @@ function Sidebar() {
 const SidebarStyled = styled.nav<{ collapsed: boolean }>`
   position: relative;
   width: ${(props) => props.theme.sidebarWidth};
-  background-color: ${(props) => props.theme.colorBg2};
-  border: 2px solid ${(props) => props.theme.borderColor2};
-  border-radius: 1rem;
+  background-color: black; /* Semi-transparent white */
+    backdrop-filter: blur(10px); /* Blur effect */
+    box-shadow: 0 4px 15px rgba(1, 0, 0, 0.2); /* Shadow for depth */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Light border */
+  border-radius: .2rem;
 
   display: flex;
   flex-direction: column;
@@ -114,15 +138,10 @@ const SidebarStyled = styled.nav<{ collapsed: boolean }>`
     padding: 0.8rem 0.9rem;
     position: absolute;
     right: -69px;
-    top: 1.8rem;
-
+    top: .2rem;
     border-top-right-radius: 1rem;
     border-bottom-right-radius: 1rem;
 
-    background-color: ${(props) => props.theme.colorBg2};
-    border-right: 2px solid ${(props) => props.theme.borderColor2};
-    border-top: 2px solid ${(props) => props.theme.borderColor2};
-    border-bottom: 2px solid ${(props) => props.theme.borderColor2};
   }
 
   .user-btn {
@@ -144,7 +163,7 @@ const SidebarStyled = styled.nav<{ collapsed: boolean }>`
   }
 
   .profile {
-    margin: 1.5rem;
+    margin: .5rem;
     padding: 1rem 0.8rem;
     position: relative;
 
@@ -152,7 +171,7 @@ const SidebarStyled = styled.nav<{ collapsed: boolean }>`
     cursor: pointer;
 
     font-weight: 500;
-    color: ${(props) => props.theme.colorGrey0};
+    color: ${(props) => props.theme.colorGrey6};
 
     display: flex;
     align-items: center;
@@ -165,19 +184,18 @@ const SidebarStyled = styled.nav<{ collapsed: boolean }>`
       height: 100%;
       backdrop-filter: blur(10px);
       z-index: 0;
-      background: ${(props) => props.theme.colorBg3};
       transition: all 0.55s linear;
-      border-radius: 1rem;
-      border: 2px solid ${(props) => props.theme.borderColor2};
+      border-radius: .3rem;
+      border: 1px solid ${(props) => props.theme.colorGreenDark};
 
-      opacity: 0.2;
+      opacity: 0.5;
     }
 
     h1 {
       font-size: 1.2rem;
       display: flex;
       flex-direction: column;
-
+      
       line-height: 1.4rem;
     }
 
@@ -185,6 +203,9 @@ const SidebarStyled = styled.nav<{ collapsed: boolean }>`
     h1 {
       position: relative;
       z-index: 1;
+      font-size:.2rem;
+      color: ${(props) => props.theme.colorGreenDark};
+
     }
 
     .image {
@@ -194,8 +215,8 @@ const SidebarStyled = styled.nav<{ collapsed: boolean }>`
       transition: all 0.5s ease;
       border-radius: 100%;
 
-      width: 70px;
-      height: 70px;
+      width: 40px;
+      height: 40px;
 
       img {
         border-radius: 100%;
@@ -205,14 +226,14 @@ const SidebarStyled = styled.nav<{ collapsed: boolean }>`
 
     > h1 {
       margin-left: 0.8rem;
-      font-size: clamp(1.2rem, 4vw, 1.4rem);
+      font-size: 1rem;
       line-height: 100%;
     }
 
     &:hover {
       .profile-overlay {
         opacity: 1;
-        border: 2px solid ${(props) => props.theme.borderColor2};
+        border: 2px solid ${(props) => props.theme.colorGreenLight};
       }
 
       img {
@@ -225,6 +246,7 @@ const SidebarStyled = styled.nav<{ collapsed: boolean }>`
     position: relative;
     padding: 0.8rem 1rem 0.9rem 2.1rem;
     margin: 0.3rem 0;
+    color: ${(props) => props.theme.colorGreenDark};
 
     display: grid;
     grid-template-columns: 40px 1fr;
@@ -238,9 +260,9 @@ const SidebarStyled = styled.nav<{ collapsed: boolean }>`
       top: 0;
       width: 0;
       height: 100%;
-      background-color: ${(props) => props.theme.activeNavLinkHover};
+      background-color: ${(props) => props.theme.colorBlack};
       z-index: 1;
-      transition: all 0.3s ease-in-out;
+      transition: all 0.01s ease-in-out;
     }
 
     &::before {
@@ -255,18 +277,17 @@ const SidebarStyled = styled.nav<{ collapsed: boolean }>`
       border-bottom-left-radius: 5px;
       border-top-left-radius: 5px;
     }
-
     a {
       font-weight: 500;
       transition: all 0.3s ease-in-out;
       z-index: 2;
-      line-height: 0;
+      line-height: 0;ty
     }
 
     i {
       display: flex;
       align-items: center;
-      color: ${(props) => props.theme.colorIcons};
+      color: ${(props) => props.theme.colorWhite};
     }
 
     &:hover {
@@ -276,22 +297,14 @@ const SidebarStyled = styled.nav<{ collapsed: boolean }>`
     }
   }
 
-  .active {
-    background-color: ${(props) => props.theme.activeNavLink};
-
-    i,
-    a {
-      color: ${(props) => props.theme.colorIcons2};
-    }
-  }
-
+ 
   .active::before {
     width: 0.3rem;
   }
 
   > button {
     margin: 1.5rem;
-  }
+  }:
 `;
 
 export default Sidebar;

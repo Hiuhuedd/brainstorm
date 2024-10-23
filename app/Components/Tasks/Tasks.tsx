@@ -1,44 +1,59 @@
 "use client";
 import { useGlobalState } from "@/app/context/globalProvider";
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import CreateContent from "../Modals/CreateContent";
 import TaskItem from "../TaskItem/TaskItem";
-import { add, plus } from "@/app/utils/Icons";
-import Modal from "../Modals/Modal";
+
+interface Task {
+  fileURI: string;
+  programCode: string;
+  isCommonUnit: boolean;
+  unitCode: string;
+  unitName: string;
+  semester: number;
+  year: number;
+  resourceDate: Date;
+  isProfessorEndorsed: boolean;
+  isExam: boolean;
+  isNotes: boolean;
+  unitProfessor: string;
+}
 
 interface Props {
   title: string;
-  tasks: any[];
+  resources: Task[]; // Pass the resources as props
 }
 
-function Tasks({ title, tasks }: Props) {
-  const { theme, isLoading, openModal, modal } = useGlobalState();
+function Tasks({ title, resources }: Props) {
+  const { theme } = useGlobalState();
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Filter resources based on the search term
+  const filteredResources = resources.filter((task) =>
+    task.unitName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <TaskStyled theme={theme}>
-      {modal && <Modal content={<CreateContent />} />}
-      <h1>{title}</h1>
-
-      <button className="btn-rounded" onClick={openModal}>
-        {plus}
-      </button>
-
+      <div className="header">
+        <h1 className="text-xl">
+          {resources.length} {title}
+        </h1>
+        <SearchBar
+          type="text"
+          placeholder={`Search ${title.toLowerCase()}..`}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
       <div className="tasks grid">
-        {tasks.map((task) => (
-          <TaskItem
-            key={task.id}
-            title={task.title}
-            description={task.description}
-            date={task.date}
-            isCompleted={task.isCompleted}
-            id={task.id}
-          />
-        ))}
-        <button className="create-task" onClick={openModal}>
-          {add}
-          Add New Task
-        </button>
+        {filteredResources.length > 0 ? (
+          filteredResources.map((task) => (
+            <TaskItem key={task.unitCode} task={task} />
+          ))
+        ) : (
+          <p>No tasks found</p>
+        )}
       </div>
     </TaskStyled>
   );
@@ -48,39 +63,16 @@ const TaskStyled = styled.main`
   position: relative;
   padding: 2rem;
   width: 100%;
-  background-color: ${(props) => props.theme.colorBg2};
-  border: 2px solid ${(props) => props.theme.borderColor2};
+  background-color: ${(props) => props.theme.colorWhite};
   border-radius: 1rem;
   height: 100%;
-
   overflow-y: auto;
 
-  &::-webkit-scrollbar {
-    width: 0.5rem;
-  }
-
-  .btn-rounded {
-    position: fixed;
-    top: 4.9rem;
-    right: 5.1rem;
-    width: 3rem;
-    height: 3rem;
-    border-radius: 50%;
-
-    background-color: ${(props) => props.theme.colorBg};
-    border: 2px solid ${(props) => props.theme.borderColor2};
-    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
-    color: ${(props) => props.theme.colorGrey2};
-    font-size: 1.4rem;
-
+  .header {
     display: flex;
+    justify-content: space-between; // Changed from space-around to space-between for better alignment
     align-items: center;
-    justify-content: center;
-
-    @media screen and (max-width: 768px) {
-      top: 3rem;
-      right: 3.5rem;
-    }
+    margin-bottom: 2rem;
   }
 
   .tasks {
@@ -88,8 +80,8 @@ const TaskStyled = styled.main`
   }
 
   > h1 {
-    font-size: clamp(1.5rem, 2vw, 2rem);
-    font-weight: 800;
+    font-size: 3rem;
+    font-weight: 500;
     position: relative;
 
     &::after {
@@ -103,30 +95,18 @@ const TaskStyled = styled.main`
       border-radius: 0.5rem;
     }
   }
+`;
 
-  .create-task {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+const SearchBar = styled.input`
+  padding: 0.5rem 1rem;
+  border: 1px solid ${(props) => props.theme.colorPrimaryGreen};
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  width: 250px;
 
-    height: 16rem;
-    color: ${(props) => props.theme.colorGrey2};
-    font-weight: 600;
-    cursor: pointer;
-    border-radius: 1rem;
-    border: 3px dashed ${(props) => props.theme.colorGrey5};
-    transition: all 0.3s ease;
-
-    i {
-      font-size: 1.5rem;
-      margin-right: 0.2rem;
-    }
-
-    &:hover {
-      background-color: ${(props) => props.theme.colorGrey5};
-      color: ${(props) => props.theme.colorGrey0};
-    }
+  &:focus {
+    outline: none;
+    border-color: ${(props) => props.theme.colorPrimaryBlue};
   }
 `;
 

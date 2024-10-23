@@ -4,19 +4,21 @@ import themes from "./themes";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useUser } from "@clerk/nextjs";
+import ProfileForm from '../Components/ProfileForm/ProfileForm';
+import { PRODUCTION_URL } from "../utils/urls";
 
 export const GlobalContext = createContext();
 export const GlobalUpdateContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
   const { user } = useUser();
-
-  const [selectedTheme, setSelectedTheme] = useState(0);
+  const [selectedTheme, setSelectedTheme] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [modal, setModal] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-
   const [tasks, setTasks] = useState([]);
+  const [profileComplete, setProfileComplete] = useState(false);
+  const [showProfileForm, setShowProfileForm] = useState(false);
 
   const theme = themes[selectedTheme];
 
@@ -32,19 +34,31 @@ export const GlobalProvider = ({ children }) => {
     setCollapsed(!collapsed);
   };
 
+  const checkProfileStatus = async () => {
+    if (!user) return;
+    
+    try {
+      const response = await fetch(`${PRODUCTION_URL}user-profile/${user.id}`);
+      const profileData = await response.json();
+      
+      setProfileComplete(!!profileData);
+      setShowProfileForm(!profileData);
+    } catch (error) {
+      console.error('Error checking profile:', error);
+      setShowProfileForm(true);
+    }
+  };
+
   const allTasks = async () => {
     setIsLoading(true);
     try {
       const res = await axios.get("/api/tasks");
-
       const sorted = res.data.sort((a, b) => {
         return (
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
       });
-
       setTasks(sorted);
-
       setIsLoading(false);
     } catch (error) {
       console.log(error);
@@ -55,7 +69,6 @@ export const GlobalProvider = ({ children }) => {
     try {
       const res = await axios.delete(`/api/tasks/${id}`);
       toast.success("Task deleted");
-
       allTasks();
     } catch (error) {
       console.log(error);
@@ -66,9 +79,7 @@ export const GlobalProvider = ({ children }) => {
   const updateTask = async (task) => {
     try {
       const res = await axios.put(`/api/tasks`, task);
-
       toast.success("Task updated");
-
       allTasks();
     } catch (error) {
       console.log(error);
@@ -81,7 +92,10 @@ export const GlobalProvider = ({ children }) => {
   const incompleteTasks = tasks.filter((task) => task.isCompleted === false);
 
   React.useEffect(() => {
-    if (user) allTasks();
+    if (user) {
+      checkProfileStatus();
+      allTasks();
+    }
   }, [user]);
 
   return (
@@ -101,10 +115,13 @@ export const GlobalProvider = ({ children }) => {
         allTasks,
         collapsed,
         collapseMenu,
+        profileComplete,
       }}
     >
       <GlobalUpdateContext.Provider value={{}}>
-        {children}
+        {
+          children
+      }
       </GlobalUpdateContext.Provider>
     </GlobalContext.Provider>
   );

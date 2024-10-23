@@ -1,29 +1,35 @@
-import { list, check, todo, home } from "./Icons";
+import { list, check, todo, home, mailIcon } from "./Icons";
 
 const menu = [
   {
     id: 1,
-    title: "All Tasks",
+    title: "Resources",
     icon: home,
     link: "/",
   },
   {
     id: 2,
-    title: "Important!",
+    title: "Exams",
     icon: list,
-    link: "/important",
+    link: "/exams",
   },
   {
     id: 3,
-    title: "Completed!",
+    title: "CATs",
     icon: check,
-    link: "/completed",
+    link: "/cats",
   },
   {
     id: 4,
-    title: "Do It Now",
+    title: "Flashcards",
+    icon: mailIcon,
+    link: "/flashcards",
+  },
+  {
+    id: 5,
+    title: "Endorsed",
     icon: todo,
-    link: "/incomplete",
+    link: "/professor-endorsed",
   },
 ];
 

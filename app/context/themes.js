@@ -31,7 +31,14 @@ const themes = [
     colorPrimaryGreen: "#6FCF97",
     borderColor: "rgba(249,249,249, 0.08)",
     borderColor2: "rgba(249,249,249, 0.08)",
-    shadow7: "1px 7px 12px rgba(8, 18, 69, 0.1)",
+    shadow1: "0px 2px 4px rgba(0, 0, 0, 0.1)",       // Subtle shadow
+    shadow2: "0px 4px 8px rgba(0, 0, 0, 0.15)",      // Moderate shadow
+    shadow3: "0px 6px 12px rgba(0, 0, 0, 0.2)",      // Stronger shadow
+    shadow4: "0px 8px 16px rgba(0, 0, 0, 0.25)",     // Deep shadow
+    shadow5: "0px 10px 20px rgba(0, 0, 0, 0.3)",     // Intense shadow
+    shadow6: "0px 12px 24px rgba(0, 0, 0, 0.35)",    // Very intense shadow
+    shadow7: "1px 7px 12px rgba(8, 18, 69, 0.1)",     // Your original shadow
+    shadow8: "0px 4px 16px rgba(255, 255, 255, 0.2)",
     sidebarWidth: "15rem",
     sidebarCollapsed: "5.4rem",
     fH4: "19px",
@@ -74,6 +81,7 @@ const themes = [
     colorGrey5: "#2a2e35",
     colorGrey6: "#12181b",
     colorWhite: "#fff",
+    colorBlack: "#111",
     buttonGradient1:
       "linear-gradient(110.42deg, rgba(107, 190, 146, 0.7) 29.2%, rgba(245, 102, 146, 0.7) 63.56%)",
     buttonGradient2:
